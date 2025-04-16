@@ -29,5 +29,15 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-require("vim-options")
-require("lazy").setup("plugins")
+require("commons.vim-options")
+
+if vim.g.vscode then
+    -- VSCode extension
+    print("NeoVim for VSCode")
+    require("lazy").setup("vs_plugins")
+else
+    -- ordinary Neovim
+    print("NeoVim only")
+    require("lazy").setup("plugins")
+end
+
