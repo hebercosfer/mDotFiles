@@ -32,9 +32,7 @@ local lazy_cmp_config = function()
                 --     return true
                 --end
             },
-            { name = "nvim_lua", priority = 1 },
-            { name = "vim_lsp",  priority = 2 },
-            { name = "luasnip",  priority = 3 },
+            { name = "luasnip",  priority = 1 },
         }, {
             { name = "path",   priority = 9 },
             { name = "buffer", keyword_length = 4, priority = 8 },

@@ -52,10 +52,10 @@ M = {
             },
         },
         --[[
-    For the core lsp config, its done outside the lazy spec folder as the
-    configuration is internally modular and I would like to fuzzy find my way into
-    a specific part of the config in future, eg keymaps, clangd, lua, python, etc..
-    --]]
+        For the core lsp config, its done outside the lazy spec folder as the
+        configuration is internally modular and I would like to fuzzy find my way into
+        a specific part of the config in future, eg keymaps, clangd, lua, python, etc..
+        --]]
         config = function()
             -- plugins we installed
             local mason = require("mason")
@@ -90,7 +90,7 @@ M = {
         event = { "BufReadPre", "BufNewFile" },
         -- The `filetypes` come from the default `filetypes` specified for
         -- `clangd` in `lspconfig` documentation
-        ft = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
+        ft = { "c", "cpp", "proto" },
         opts = {
             inlay_hints = {
                 only_current_line = true,

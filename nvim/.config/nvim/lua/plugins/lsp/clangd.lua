@@ -6,6 +6,7 @@ M.should_install = function() end
 
 local root_files = {
 	"compile_commands.json",
+	"./build/compile_commands.json",
 }
 local root_dir_func = function(fname)
 	return require("lspconfig.util").root_pattern(unpack(root_files))(fname)

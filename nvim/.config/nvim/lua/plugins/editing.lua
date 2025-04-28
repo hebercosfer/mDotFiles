@@ -15,7 +15,7 @@ local M = {
     {
         -- https://github.com/numToStr/Comment.nvim
         "numToStr/Comment.nvim",
-        event = "VeryLazy",
+        -- event = "VeryLazy",
         config = true,
     },
     {
