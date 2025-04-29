@@ -32,7 +32,7 @@ local lazy_cmp_config = function()
                 --     return true
                 --end
             },
-            { name = "luasnip",  priority = 1 },
+            { name = "luasnip", priority = 1 },
         }, {
             { name = "path",   priority = 9 },
             { name = "buffer", keyword_length = 4, priority = 8 },

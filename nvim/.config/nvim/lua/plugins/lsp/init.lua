@@ -30,14 +30,14 @@ local setup_diagnostic_config = function()
         {
             "]d",
             function()
-                vim.diagnostic.goto_next()
+                vim.lsp.diagnostic.goto_next()
             end,
             desc = "Next [d]iagnostic"
         },
         {
             "[d",
             function()
-                vim.diagnostic.goto_prev()
+                vim.lsp.diagnostic.goto_prev()
             end,
             desc = "Prev [d]iagnostic"
         },
@@ -54,10 +54,8 @@ local setup_diagnostic_config = function()
 end
 
 local setup_custom_handlers = function()
-    vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded" })
-
-    vim.lsp.handlers["textDocument/signatureHelp"] =
-        vim.lsp.with(vim.lsp.handlers.signature_help, { border = "rounded" })
+    vim.lsp.handlers["textDocument/hover"] = vim.lsp.buf.hover({ border = "rounded" })
+    vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.buf.signature_help({ border = "rounded" })
 end
 
 local setup_other_lsps = function(lspconfig)
@@ -113,7 +111,6 @@ function M.setup(mason, mason_lspconfig, lspconfig, neodev)
   - https://github.com/williamboman/mason-lspconfig.nvim
   - https://github.com/folke/lua-dev.nvim
   --]]
-    -- [[
     mason.setup({
         ui = {
             icons = {
@@ -124,7 +121,6 @@ function M.setup(mason, mason_lspconfig, lspconfig, neodev)
         },
     })
 
-    -- local ensure_installed = { "lua_ls" }
     mason_lspconfig.setup({
         ensure_installed = { "clangd", "lua_ls" },
         automatic_installation = true,
@@ -133,7 +129,6 @@ function M.setup(mason, mason_lspconfig, lspconfig, neodev)
     setup_diagnostic_config()
     setup_custom_handlers()
 
-    -- `neodev` should be setup before we setup `lua_ls`
     neodev.setup()
 
     require("which-key").add({
@@ -145,7 +140,6 @@ function M.setup(mason, mason_lspconfig, lspconfig, neodev)
     require("plugins.lsp.lua_ls").custom_setup()
 
     setup_other_lsps(lspconfig)
-    --]]
 end
 
 return M

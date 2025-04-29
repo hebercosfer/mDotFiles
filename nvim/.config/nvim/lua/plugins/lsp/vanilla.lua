@@ -37,8 +37,6 @@ M.setup_native_buffer_mappings = function(
             vim.lsp.buf.rename,
             desc = lsp_prefix("[r]ename identifier under cursor"),
         },
-        -- `Format` user command is setup during `conform` setup.
-        { "<leader>lf", "<Cmd>Format<Cr>", desc = lsp_prefix("[f]ormat buffer") },
     })
 end
 

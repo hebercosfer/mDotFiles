@@ -39,5 +39,5 @@ else
     -- ordinary Neovim
     print("NeoVim only")
     require("lazy").setup("plugins")
+    require("custom.floaterminal")
 end
-

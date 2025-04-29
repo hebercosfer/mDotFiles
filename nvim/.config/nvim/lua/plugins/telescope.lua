@@ -13,21 +13,21 @@ return {
     },
     {
         "nvim-telescope/telescope.nvim",
-        tag = "0.1.5",
+        tag = "0.1.8",
         config = function()
             local telescope = require("telescope")
             local builtin = require("telescope.builtin")
 
-            pcall(telescope.load_extension, "fzf")
+            telescope.load_extension("fzf")
             telescope.load_extension("luasnip")
             telescope.load_extension("file_browser")
 
             telescope.setup({
-                defaults = {
-                    file_ignore_patterns = {
-                        "^.git/",
-                    },
-                },
+                -- defaults = {
+                -- 	file_ignore_patterns = {
+                -- 		"^.git/",
+                -- 	},
+                -- },
                 extensions = {
                     fzf = {},
                     file_browser = {},
@@ -76,6 +76,8 @@ return {
             vim.keymap.set({ "n" }, "\\s", function()
                 builtin.resume()
             end, { desc = "Re[s]ume telescope" })
+
+            require("custom.multigrep").setup()
         end,
         dependencies = {
             {
@@ -88,13 +90,7 @@ return {
             {
                 "nvim-tree/nvim-web-devicons",
             },
-            {
-                "nvim-telescope/telescope-fzf-native.nvim",
-                build = "make",
-                cond = function()
-                    return vim.fn.executable("make") == 1
-                end,
-            },
+            { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' },
             {
                 "nvim-telescope/telescope-file-browser.nvim",
             },
