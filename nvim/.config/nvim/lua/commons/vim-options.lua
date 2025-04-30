@@ -8,6 +8,23 @@ vim.g.background = "light"
 
 vim.opt.swapfile = false
 
+-- From Advent of NVIM --
+vim.keymap.set("n", "<space><space>x", "<cmd>source %<CR>", { desc = "Sourcing current file"})
+vim.keymap.set("n", "<space>x", ":.lua<CR>", { desc = "Executing current lua file"})
+vim.keymap.set("v", "<space>x", ":lua<CR>", { desc = "Executing current lua selection"})
+
+
+-- Highlight when yanking (copying) text
+--  Try it with `yap` in normal mode
+--  See `:help vim.highlight.on_yank()`
+vim.api.nvim_create_autocmd("TextYankPost", {
+    desc = "Highlight when yanking (copying) text",
+    group = vim.api.nvim_create_augroup("kickstart-highlight-yank", { clear = true }),
+    callback = function()
+        vim.highlight.on_yank()
+    end,
+})
+
 -- Navigate vim panes better
 vim.keymap.set("n", "<c-k>", ":wincmd k<CR>")
 vim.keymap.set("n", "<c-j>", ":wincmd j<CR>")
@@ -16,19 +33,20 @@ vim.keymap.set("n", "<c-l>", ":wincmd l<CR>")
 vim.keymap.set("n", "<c-s>", ":w<CR>")
 vim.wo.number = true
 
-vim.keymap.set("n", "<leader>qq", vim.cmd.Ex)
+vim.keymap.set("n", "<leader>qq", vim.cmd.Ex, { desc = "Inital NeoVim screen"})
+
 vim.keymap.set("n", "<C-d>", "<C-d>zz")
 vim.keymap.set("n", "<C-u>", "<C-u>zz")
 
+
 -- next greatest remap ever : asbjornHaland
-vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]])
-vim.keymap.set("n", "<leader>Y", [["+Y]])
+vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "[y]ank continuosly"})
+vim.keymap.set({ "n", "v" }, "<leader>Y", [["+Y]], { desc = "[Y]ank all line continuosly"})
+vim.keymap.set({ "n", "v" }, "<leader>p", [["+p]], { desc = "[p]aste continuosly"})
 
-vim.keymap.set("n", "<leader>f", vim.lsp.buf.format)
-
-vim.keymap.set("n", "<leader>bn", "<cmd>bnext<CR>")
-vim.keymap.set("n", "<leader>bp", "<cmd>bprev<CR>")
-vim.keymap.set("n", "<leader>en", "<cmd>cnext<CR>")
-vim.keymap.set("n", "<leader>ep", "<cmd>cprev<CR>")
-vim.keymap.set("n", "<leader>dn", "<cmd>lnext<CR>")
-vim.keymap.set("n", "<leader>dp", "<cmd>lprev<CR>")
+vim.keymap.set("n", "<leader>bn", "<cmd>bnext<CR>", { desc = "[B]uffer [N]ext"})
+vim.keymap.set("n", "<leader>bp", "<cmd>bprev<CR>", { desc = "[B]uffer [P]revious"})
+vim.keymap.set("n", "<leader>en", "<cmd>cnext<CR>", { desc = "[E]rrors [N]ext"})
+vim.keymap.set("n", "<leader>ep", "<cmd>cprev<CR>", { desc = "[E]rrors [P]revious"})
+vim.keymap.set("n", "<leader>dn", "<cmd>lnext<CR>", { desc = "[D]iagnostic [N]ext"})
+vim.keymap.set("n", "<leader>dp", "<cmd>lprev<CR>", { desc = "[D]iagnostic [P]revious"})
