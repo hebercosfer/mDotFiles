@@ -44,9 +44,11 @@ vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "[y]ank continuosly"
 vim.keymap.set({ "n", "v" }, "<leader>Y", [["+Y]], { desc = "[Y]ank all line continuosly"})
 vim.keymap.set({ "n", "v" }, "<leader>p", [["+p]], { desc = "[p]aste continuosly"})
 
-vim.keymap.set("n", "<leader>bn", "<cmd>bnext<CR>", { desc = "[B]uffer [N]ext"})
-vim.keymap.set("n", "<leader>bp", "<cmd>bprev<CR>", { desc = "[B]uffer [P]revious"})
-vim.keymap.set("n", "<leader>en", "<cmd>cnext<CR>", { desc = "[E]rrors [N]ext"})
-vim.keymap.set("n", "<leader>ep", "<cmd>cprev<CR>", { desc = "[E]rrors [P]revious"})
-vim.keymap.set("n", "<leader>dn", "<cmd>lnext<CR>", { desc = "[D]iagnostic [N]ext"})
-vim.keymap.set("n", "<leader>dp", "<cmd>lprev<CR>", { desc = "[D]iagnostic [P]revious"})
+vim.keymap.set("n", "<leader>f", vim.lsp.buf.format)
+
+vim.keymap.set("n", "<leader>bn", "<cmd>bnext<CR>")
+vim.keymap.set("n", "<leader>bp", "<cmd>bprev<CR>")
+vim.keymap.set("n", "<leader>en", "<cmd>cnext<CR>")
+vim.keymap.set("n", "<leader>ep", "<cmd>cprev<CR>")
+vim.keymap.set("n", "<leader>dn", "<cmd>lnext<CR>")
+vim.keymap.set("n", "<leader>dp", "<cmd>lprev<CR>")

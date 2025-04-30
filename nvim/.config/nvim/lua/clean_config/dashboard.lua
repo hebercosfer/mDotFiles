@@ -1,4 +1,4 @@
-eturneturn {
+return {
     "goolord/alpha-nvim",
     dependencies = {
         "nvim-tree/nvim-web-devicons",
@@ -46,6 +46,6 @@ eturneturn {
 
         alpha.setup(dashboard.opts)
 
-        vim.keymap.set("n", "<leader>a", ":Alpha<CR>", {})
+        vim.keymap.set("n", "<leader>a", ":Alpha<CR>", {desc="Show [A]lpha Dashboard"})
     end,
 }
