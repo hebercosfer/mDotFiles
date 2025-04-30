@@ -9,9 +9,9 @@ vim.g.background = "light"
 vim.opt.swapfile = false
 
 -- From Advent of NVIM --
-vim.keymap.set("n", "<space><space>x", "<cmd>source %<CR>", { desc = "Sourcing current file"})
-vim.keymap.set("n", "<space>x", ":.lua<CR>", { desc = "Executing current lua file"})
-vim.keymap.set("v", "<space>x", ":lua<CR>", { desc = "Executing current lua selection"})
+vim.keymap.set("n", "<space><space>x", "<cmd>source %<CR>", { desc = "Sourcing current file" })
+vim.keymap.set("n", "<space>x", ":.lua<CR>", { desc = "Executing current lua file" })
+vim.keymap.set("v", "<space>x", ":lua<CR>", { desc = "Executing current lua selection" })
 
 
 -- Highlight when yanking (copying) text
@@ -33,16 +33,16 @@ vim.keymap.set("n", "<c-l>", ":wincmd l<CR>")
 vim.keymap.set("n", "<c-s>", ":w<CR>")
 vim.wo.number = true
 
-vim.keymap.set("n", "<leader>qq", vim.cmd.Ex, { desc = "Inital NeoVim screen"})
+vim.keymap.set("n", "<leader>qq", vim.cmd.Ex, { desc = "Inital NeoVim screen" })
 
 vim.keymap.set("n", "<C-d>", "<C-d>zz")
 vim.keymap.set("n", "<C-u>", "<C-u>zz")
 
 
 -- next greatest remap ever : asbjornHaland
-vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "[y]ank continuosly"})
-vim.keymap.set({ "n", "v" }, "<leader>Y", [["+Y]], { desc = "[Y]ank all line continuosly"})
-vim.keymap.set({ "n", "v" }, "<leader>p", [["+p]], { desc = "[p]aste continuosly"})
+vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "[y]ank continuosly" })
+vim.keymap.set({ "n", "v" }, "<leader>Y", [["+Y]], { desc = "[Y]ank all line continuosly" })
+vim.keymap.set({ "n", "v" }, "<leader>p", [["+p]], { desc = "[p]aste continuosly" })
 
 vim.keymap.set("n", "<leader>f", vim.lsp.buf.format)
 

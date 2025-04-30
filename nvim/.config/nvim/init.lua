@@ -25,3 +25,7 @@ else
     require("lazy").setup("clean_config")
     require("custom.floaterminal")
 end
+
+vim.lsp.enable({
+    "luals", -- lua
+})

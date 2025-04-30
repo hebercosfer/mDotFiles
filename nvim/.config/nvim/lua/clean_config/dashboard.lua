@@ -46,6 +46,6 @@ return {
 
         alpha.setup(dashboard.opts)
 
-        vim.keymap.set("n", "<leader>a", ":Alpha<CR>", {desc="Show [A]lpha Dashboard"})
+        vim.keymap.set("n", "<leader>a", ":Alpha<CR>", { desc = "Show [A]lpha Dashboard" })
     end,
 }

@@ -1,9 +1,4 @@
-M = {
-    {
-        "stevearc/dressing.nvim",
-        opts = {},
-        event = "VeryLazy",
-    },
+return {
     {
         -- https://github.com/neovim/nvim-lspconfig
         -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md
@@ -19,20 +14,8 @@ M = {
                 "williamboman/mason-lspconfig.nvim",
             },
             {
-                -- https://github.com/folke/lua-dev.nvimdot
-                "folke/lua-dev.nvim",
-            },
-            {
-                -- https://github.com/b0o/SchemaStore.nvim
-                "b0o/schemastore.nvim",
-            },
-            {
                 -- spec elsewhere
-                "folke/which-key.nvim",
-            },
-            {
-                -- spec elsewhere
-                "nvim-telescope/telescope.nvim",
+                "hrsh7th/nvim-cmp",
             },
             {
                 -- spec elsewhere
@@ -40,15 +23,7 @@ M = {
             },
             {
                 -- spec elsewhere
-                "ray-x/lsp_signature.nvim",
-            },
-            {
-                -- spec below
-                "aznhe21/actions-preview.nvim",
-            },
-            {
-                -- spec below
-                "p00f/clangd_extensions.nvim",
+                "L3MON4D3/LuaSnip.nvim",
             },
         },
         --[[

@@ -1,24 +1,24 @@
 return {
     { "MunifTanjim/nui.nvim" },
-{
-                "s1n7ax/nvim-window-picker",
-                version = "2.*",
-                config = function()
-                    require("window-picker").setup({
-                        filter_rules = {
-                            include_current_win = false,
-                            autoselect_one = true,
-                            -- filter using buffer options
-                            bo = {
-                                -- if the file type is one of following, the window will be ignored
-                                filetype = { "neo-tree", "neo-tree-popup", "notify" },
-                                -- if the buffer type is one of following, the window will be ignored
-                                buftype = { "terminal", "quickfix" },
-                            },
-                        },
-                    })
-                end,
-            },
+    {
+        "s1n7ax/nvim-window-picker",
+        version = "2.*",
+        config = function()
+            require("window-picker").setup({
+                filter_rules = {
+                    include_current_win = false,
+                    autoselect_one = true,
+                    -- filter using buffer options
+                    bo = {
+                        -- if the file type is one of following, the window will be ignored
+                        filetype = { "neo-tree", "neo-tree-popup", "notify" },
+                        -- if the buffer type is one of following, the window will be ignored
+                        buftype = { "terminal", "quickfix" },
+                    },
+                },
+            })
+        end,
+    },
     {
         "nvim-neo-tree/neo-tree.nvim",
         branch = "v3.x",
@@ -27,8 +27,8 @@ return {
             "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
             "MunifTanjim/nui.nvim",
             -- "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
-                "s1n7ax/nvim-window-picker",
-           },
+            "s1n7ax/nvim-window-picker",
+        },
         config = function()
             -- If you want icons for diagnostic errors, you'll need to define them somewhere:
             vim.fn.sign_define("DiagnosticSignError", { text = " ", texthl = "DiagnosticSignError" })
@@ -242,7 +242,7 @@ return {
                         },
                         never_show_by_pattern = { -- uses glob style patterns
                             --".null-ls_*"
-                        }   
+                        }
                     },
                     group_empty_dirs = false,               -- when true, empty folders will be grouped together
                     hijack_netrw_behavior = "open_current", -- netrw disabled, opening a directory opens neo-tree
@@ -331,9 +331,11 @@ return {
                 },
             })
 
-            vim.keymap.set("n", "<C-n>", ":Neotree toggle<CR>", { desc = "Toggle [N]eoTree"})
-            vim.keymap.set("n", "<leader>gf", ":Neotree float git_status<CR>", { desc = "Neotree: [G]it [f]loating window"})
-            vim.keymap.set("n", "<leader>bf", ":Neotree buffers reveal right<CR>", { desc = "Neotree: [b]uffers [r]eveal"})
+            vim.keymap.set("n", "<C-n>", ":Neotree toggle<CR>", { desc = "Toggle [N]eoTree" })
+            vim.keymap.set("n", "<leader>gf", ":Neotree float git_status<CR>",
+                { desc = "Neotree: [G]it [f]loating window" })
+            vim.keymap.set("n", "<leader>bf", ":Neotree buffers reveal right<CR>",
+                { desc = "Neotree: [b]uffers [r]eveal" })
         end,
     }
 }
