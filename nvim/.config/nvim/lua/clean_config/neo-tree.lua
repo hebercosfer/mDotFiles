@@ -334,7 +334,7 @@ return {
             vim.keymap.set("n", "<C-n>", ":Neotree toggle<CR>", { desc = "Toggle [N]eoTree" })
             vim.keymap.set("n", "<leader>gf", ":Neotree float git_status<CR>",
                 { desc = "Neotree: [G]it [f]loating window" })
-            vim.keymap.set("n", "<leader>bf", ":Neotree buffers reveal right<CR>",
+            vim.keymap.set("n", "<leader>br", ":Neotree buffers reveal right<CR>",
                 { desc = "Neotree: [b]uffers [r]eveal" })
         end,
     }
