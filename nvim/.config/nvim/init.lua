@@ -26,6 +26,4 @@ else
     require("custom.floaterminal")
 end
 
-vim.lsp.enable({
-    "luals", -- lua
-})
+require("commons.lsp")
