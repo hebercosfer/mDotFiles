@@ -1,11 +1,11 @@
-vim.o.tabstop = 4      -- Insert 4 spaces for a tab
-vim.o.shiftwidth = 4   -- Change the number of space characters inserted for indentation
+vim.o.tabstop = 4 -- Insert 4 spaces for a tab
+vim.o.shiftwidth = 4 -- Change the number of space characters inserted for indentation
 vim.o.expandtab = true -- Converts tabs to spacesvim.opt.clipboard = "unnamedplus"
 vim.opt.number = true
 vim.opt.relativenumber = true
 vim.g.mapleader = " "
 vim.g.background = "light"
-
+vim.o.winborder = "rounded"
 vim.opt.swapfile = false
 
 -- From Advent of NVIM --
@@ -13,16 +13,15 @@ vim.keymap.set("n", "<space><space>x", "<cmd>source %<CR>", { desc = "Sourcing c
 vim.keymap.set("n", "<space>x", ":.lua<CR>", { desc = "Executing current lua file" })
 vim.keymap.set("v", "<space>x", ":lua<CR>", { desc = "Executing current lua selection" })
 
-
 -- Highlight when yanking (copying) text
 --  Try it with `yap` in normal mode
 --  See `:help vim.highlight.on_yank()`
 vim.api.nvim_create_autocmd("TextYankPost", {
-    desc = "Highlight when yanking (copying) text",
-    group = vim.api.nvim_create_augroup("kickstart-highlight-yank", { clear = true }),
-    callback = function()
-        vim.highlight.on_yank()
-    end,
+	desc = "Highlight when yanking (copying) text",
+	group = vim.api.nvim_create_augroup("kickstart-highlight-yank", { clear = true }),
+	callback = function()
+		vim.highlight.on_yank()
+	end,
 })
 
 -- Navigate vim panes better
@@ -37,7 +36,6 @@ vim.keymap.set("n", "<leader>qq", vim.cmd.Ex, { desc = "Inital NeoVim screen" })
 
 vim.keymap.set("n", "<C-d>", "<C-d>zz")
 vim.keymap.set("n", "<C-u>", "<C-u>zz")
-
 
 -- next greatest remap ever : asbjornHaland
 vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "[y]ank continuosly" })
