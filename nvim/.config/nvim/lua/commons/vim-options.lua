@@ -30,6 +30,7 @@ vim.keymap.set("n", "<c-j>", ":wincmd j<CR>")
 vim.keymap.set("n", "<c-h>", ":wincmd h<CR>")
 vim.keymap.set("n", "<c-l>", ":wincmd l<CR>")
 vim.keymap.set("n", "<c-s>", ":w!<CR>")
+
 vim.keymap.set("n", "U", "<C-r>")
 vim.wo.number = true
 
@@ -42,6 +43,7 @@ vim.keymap.set("n", "<C-u>", "<C-u>zz")
 vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "[y]ank continuosly" })
 vim.keymap.set({ "n", "v" }, "<leader>Y", [["+Y]], { desc = "[Y]ank all line continuosly" })
 vim.keymap.set({ "n", "v" }, "<leader>p", [["+p]], { desc = "[p]aste continuosly" })
+vim.keymap.set("v", "<leader>rs", "\"hy:%s/<C-r>h//gi<left><left><left>", { desc = "[R]eplace selection on file" })
 
 vim.keymap.set("n", "<leader>f", vim.lsp.buf.format)
 

@@ -15,6 +15,10 @@ return {
         pickers = {
           find_files = {
             theme = "ivy"
+          },
+          coloscheme = {
+            theme = "ivy",
+            enable_preview = true
           }
         },
         extensions = {
@@ -24,23 +28,27 @@ return {
 
       telescope.load_extension("fzf")
 
-      vim.keymap.set("n", "<space>fh", require("telescope.builtin").help_tags,
+      vim.keymap.set("n", "<leader>fh", builtin.help_tags,
         { desc = "Telescope: [f]ind [h]elp tags" })
-      vim.keymap.set("n", "<space>ff", require("telescope.builtin").find_files,
+      vim.keymap.set("n", "<leader>ff", builtin.find_files,
         { desc = "Telescope: [f]ind [f]iles" })
 
-      vim.keymap.set("n", "<space>fc", function()
+      vim.keymap.set("n", "<leader>fc", function()
           builtin.find_files {
             cwd = vim.fn.stdpath("config")
           }
         end,
         { desc = "Telescope: [f]ind [c]onfig NeoVim files" })
-      vim.keymap.set("n", "<space>fn", function()
+
+      vim.keymap.set("n", "<leader>bf", builtin.buffers, { desc = "Telescope: [f]ind [b]uffers" })
+
+      vim.keymap.set("n", "<leader>fn", function()
           builtin.find_files {
             cwd = vim.fs.joinpath(vim.fn.stdpath("data"), "lazy")
           }
         end,
         { desc = "Telescope: [f]ind internal [n]eoVim files" })
+      vim.keymap.set({ "n" }, "<leader>cl", builtin.colorscheme, { desc = "Chose [c]o[l]ourschemes" })
 
       require("custom.multigrep").setup()
     end
