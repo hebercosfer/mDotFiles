@@ -58,3 +58,5 @@ vim.keymap.set("n", "<leader>en", "<cmd>cnext<CR>")
 vim.keymap.set("n", "<leader>ep", "<cmd>cprev<CR>")
 vim.keymap.set("n", "<leader>dn", "<cmd>lnext<CR>")
 vim.keymap.set("n", "<leader>dp", "<cmd>lprev<CR>")
+
+vim.keymap.set("v", "/", '"fy/\\V<C-R>f<CR>')

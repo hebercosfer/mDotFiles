@@ -34,6 +34,7 @@ return { -- Autoformat
             c = { "clang_format" },
             cpp = { "clang_format" },
             cmake = { "cmake_format" },
+            json = { "jq" },
             -- Conform can also run multiple formatters sequentially
             -- python = { "isort", "black" },
             --

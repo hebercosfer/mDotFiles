@@ -231,19 +231,20 @@ return {
                     follow_current_file = { enabled = true },
                     use_libuv_file_watcher = true,
                     filtered_items = {
-                        visible = false, -- when true, they will just be displayed differently than normal items
+                        visible = true, -- when true, they will just be displayed differently than normal items
                         hide_dotfiles = false,
                         hide_gitignored = true,
                         hide_hidden = false, -- only works on Windows for hidden files/directories
                         hide_by_name = {
-                            --"node_modules"
+                            "*/build*/*",
+                            "*/.git/*",
                         },
                         hide_by_pattern = { -- uses glob style patterns
                             --"*.meta",
                             --"*/src/*/tsconfig.json",
                         },
                         always_show = { -- remains visible even if other settings would normally hide it
-                            --".gitignored",
+                            ".gitignored",
                         },
                         always_show_by_pattern = { -- uses glob style patterns
                             --".env*",
