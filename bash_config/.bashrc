@@ -143,3 +143,9 @@ shopt -s histappend
 export PATH=~/Workspace/nvim-linux64/bin:~/.local/kitty.app/bin:$PATH
 source /usr/share/fzf/shell/key-bindings.bash
 source /usr/share/fzf/shell/completion.bash
+
+# --- fastfetch (WSL, interactive shells only) ---
+if [[ $- == *i* ]] && [[ -z "$FASTFETCH_SHOWN" ]]; then
+  export FASTFETCH_SHOWN=1
+  fastfetch
+fi

@@ -173,3 +173,7 @@ symbol = " "
 
 [gradle]
 symbol = " "
+
+[os]
+disabled = false
+format = "[$symbol]($style)"

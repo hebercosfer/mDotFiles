@@ -19,6 +19,7 @@ return {
             require("mini.indentscope").setup()
             -- require("mini.notify").setup()
             require("mini.sessions").setup({ autoread = true })
+            require("mini.map").setup()
         end,
     },
 }
