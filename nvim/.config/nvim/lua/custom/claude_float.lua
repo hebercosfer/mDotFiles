@@ -22,6 +22,9 @@ local state = {
     mini_buf = -1,
     mini_win = -1,
     mini_timer = nil,
+    -- Background watcher that auto-minimizes when an edit-approval diff opens.
+    watch_timer = nil,
+    diff_seen = false,
 }
 
 -- Tuning for the corner notification.
@@ -33,6 +36,10 @@ local mini = {
     -- plus the message paragraph before it.
     max_lines = 12, -- hard cap on lines shown
     gaps = 1, -- blank-line separators to cross before stopping
+    -- Auto-minimize the float when an edit-approval diff opens (so the diff,
+    -- which the float would otherwise cover, is visible).
+    auto_minimize_on_diff = true,
+    watch_ms = 300, -- how often to poll for an open diff
 }
 
 local function buf_valid()
@@ -104,6 +111,29 @@ local function is_status_line(line)
             -- A glyph alone is ambiguous (e.g. a markdown bullet), so require a
             -- standalone timer like "17s" to treat it as a status line.
             return s:find("%f[%d]%d+s%f[%W]") ~= nil
+        end
+    end
+    return false
+end
+
+-- claudecode.nvim shows an edit approval as a native diff (not a terminal
+-- prompt): the proposed side is a scratch buffer (buftype=acwrite) named like
+-- "✻ [Claude Code] <file> (<hash>) ⧉ (proposed)" or "… (NEW FILE - proposed)"
+-- (claudecode/diff.lua:1209, confirmed via a live capture). Our editor-relative
+-- float sits on top of those splits, so the presence of such a buffer is the
+-- cue to drop out of the way. The "(New)" names are an older fallback path.
+local function diff_pending()
+    for _, b in ipairs(vim.api.nvim_list_bufs()) do
+        if vim.api.nvim_buf_is_loaded(b) then
+            local name = vim.api.nvim_buf_get_name(b)
+            if
+                name:find("[Claude Code]", 1, true)
+                or name:find("proposed)", 1, true)
+                or name:match("%(New%)$")
+                or name:match("%(NEW FILE%)$")
+            then
+                return true
+            end
         end
     end
     return false
@@ -304,6 +334,51 @@ local function show_mini()
     return true
 end
 
+local function stop_watch()
+    if state.watch_timer then
+        state.watch_timer:stop()
+        if not state.watch_timer:is_closing() then
+            state.watch_timer:close()
+        end
+        state.watch_timer = nil
+    end
+    state.diff_seen = false
+end
+
+-- Poll while the full float is open and collapse it to the corner notification
+-- the moment an edit-approval diff appears. Edge-triggered: it fires once per
+-- diff and re-arms only after the diff clears, so a manual restore (to review
+-- the diff) is never fought.
+local function start_watch()
+    stop_watch()
+    if not mini.auto_minimize_on_diff then
+        return
+    end
+    state.watch_timer = uv.new_timer()
+    state.watch_timer:start(
+        mini.watch_ms,
+        mini.watch_ms,
+        vim.schedule_wrap(function()
+            if not buf_valid() then
+                stop_watch()
+                return
+            end
+            -- Only act while the big float is showing; ignore when minimized.
+            if not win_valid() then
+                return
+            end
+            if diff_pending() then
+                if not state.diff_seen then
+                    state.diff_seen = true
+                    M.minimize()
+                end
+            else
+                state.diff_seen = false
+            end
+        end)
+    )
+end
+
 --- Big float ----------------------------------------------------------------
 
 local function open_window()
@@ -372,6 +447,7 @@ local function spawn(cmd_string, env_table, effective_config, focus)
                 if job_id ~= state.jobid then
                     return
                 end
+                stop_watch()
                 hide_mini()
                 if
                     win_valid() and (not effective_config or effective_config.auto_close ~= false)
@@ -404,6 +480,8 @@ local function spawn(cmd_string, env_table, effective_config, focus)
     vim.keymap.set("t", "<C-x><C-m>", function()
         M.minimize()
     end, { buffer = state.buf, desc = "Minimize Claude to a corner notification" })
+
+    start_watch()
 
     if focus ~= false then
         focus_window()
@@ -439,6 +517,7 @@ function M.open(cmd_string, env_table, effective_config, focus)
 end
 
 function M.close()
+    stop_watch()
     hide_mini()
     if win_valid() then
         vim.api.nvim_win_close(state.win, true)
