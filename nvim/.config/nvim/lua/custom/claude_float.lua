@@ -22,9 +22,10 @@ local state = {
     mini_buf = -1,
     mini_win = -1,
     mini_timer = nil,
-    -- Background watcher that auto-minimizes when an edit-approval diff opens.
+    -- Background watcher that auto-minimizes on diffs and restores when idle.
     watch_timer = nil,
     diff_seen = false,
+    was_busy = false,
 }
 
 -- Tuning for the corner notification.
@@ -39,7 +40,10 @@ local mini = {
     -- Auto-minimize the float when an edit-approval diff opens (so the diff,
     -- which the float would otherwise cover, is visible).
     auto_minimize_on_diff = true,
-    watch_ms = 300, -- how often to poll for an open diff
+    -- Auto-restore the float when Claude finishes and waits for input (but not
+    -- while a diff is up -- you are reviewing that).
+    auto_restore_on_input = true,
+    watch_ms = 300, -- how often the watcher polls
 }
 
 local function buf_valid()
@@ -95,8 +99,26 @@ end
 -- task runs, e.g. "✶ Baked for 17s … (esc to interrupt)". When it is the line
 -- we anchor on, we also pull in the message paragraph above it; when Claude is
 -- idle there is no such line, so we show only the last message paragraph.
-local SPINNER_GLYPHS =
-    { "·", "✢", "✳", "✶", "✻", "✽", "∗", "*", "✺", "✦", "✷", "✸", "✴" }
+local SPINNER_GLYPHS = {
+    "·",
+    "✢",
+    "✳",
+    "✶",
+    "✷",
+    "✸",
+    "✺",
+    "✻",
+    "✼",
+    "✽",
+    "✦",
+    "✴",
+    "∗",
+    "*",
+    "◐",
+    "◑",
+    "◒",
+    "◓",
+}
 
 local function is_status_line(line)
     if line == nil then
@@ -106,14 +128,20 @@ local function is_status_line(line)
     if s:find("esc to interrupt", 1, true) then
         return true
     end
+    -- Otherwise a live status line pairs a running timer ("17s", "2m 7s") with a
+    -- spinner glyph, or the characteristic ellipsis / mid-dot / token counter --
+    -- the spinner glyph itself cycles and is not reliably enumerable.
+    if not s:find("%f[%d]%d+s%f[%W]") then
+        return false
+    end
     for _, g in ipairs(SPINNER_GLYPHS) do
         if s:sub(1, #g) == g then
-            -- A glyph alone is ambiguous (e.g. a markdown bullet), so require a
-            -- standalone timer like "17s" to treat it as a status line.
-            return s:find("%f[%d]%d+s%f[%W]") ~= nil
+            return true
         end
     end
-    return false
+    return s:find("…", 1, true) ~= nil
+        or s:find("·", 1, true) ~= nil
+        or s:lower():find("tokens", 1, true) ~= nil
 end
 
 -- claudecode.nvim shows an edit approval as a native diff (not a terminal
@@ -139,6 +167,33 @@ local function diff_pending()
     return false
 end
 
+-- Row of the input box's TOP edge; everything above it is the conversation.
+-- The prompt is framed by two full-width rules (────) with the input between,
+-- or (older UI) a ╭rounded╮ box. Returns #lines+1 when no box is rendered yet.
+local function input_boundary(lines)
+    local bottom_rule
+    for i = #lines, 1, -1 do
+        if is_rule(lines[i]) then
+            bottom_rule = i
+            break
+        end
+    end
+    if bottom_rule then
+        for i = bottom_rule - 1, math.max(1, bottom_rule - 6), -1 do
+            if is_rule(lines[i]) then
+                return i
+            end
+        end
+        return bottom_rule
+    end
+    for i = #lines, 1, -1 do
+        if is_box_top(lines[i]) then
+            return i
+        end
+    end
+    return #lines + 1
+end
+
 -- The current task status: the trailing block of conversation output that sits
 -- ABOVE the input prompt box -- the spinner/status line ("✶ Baked for 17s")
 -- plus the message paragraph before it. Falls back to a plain tail if no box
@@ -154,33 +209,7 @@ local function status_lines()
     end
 
     -- The input box bounds the bottom; everything above it is the conversation.
-    -- The prompt is framed by two full-width rules (────) with the input
-    -- between, or (older UI) a ╭rounded╮ box. Anchor the boundary at the box's
-    -- TOP edge so the prompt, rules and status bar below never leak in.
-    local boundary = #lines + 1
-    local bottom_rule
-    for i = #lines, 1, -1 do
-        if is_rule(lines[i]) then
-            bottom_rule = i
-            break
-        end
-    end
-    if bottom_rule then
-        boundary = bottom_rule
-        for i = bottom_rule - 1, math.max(1, bottom_rule - 6), -1 do
-            if is_rule(lines[i]) then
-                boundary = i
-                break
-            end
-        end
-    else
-        for i = #lines, 1, -1 do
-            if is_box_top(lines[i]) then
-                boundary = i
-                break
-            end
-        end
-    end
+    local boundary = input_boundary(lines)
 
     -- The live status/spinner line (the current task) sits just above the box,
     -- though a "Tip:"/blank footer line may sit between them. Look for it in a
@@ -240,6 +269,25 @@ local function status_lines()
         out = { "(no output yet)" }
     end
     return out
+end
+
+-- Claude is actively processing when its live status/spinner line is present
+-- just above the input box. Absence => idle / waiting for the user's input.
+local function is_working()
+    if not buf_valid() then
+        return false
+    end
+    local lines = vim.api.nvim_buf_get_lines(state.buf, 0, -1, false)
+    local boundary = input_boundary(lines)
+    for i = boundary - 1, math.max(1, boundary - 6), -1 do
+        if is_rule(lines[i]) or is_box_top(lines[i]) then
+            break
+        end
+        if is_status_line(lines[i]) then
+            return true
+        end
+    end
+    return false
 end
 
 local function stop_mini_timer()
@@ -343,17 +391,23 @@ local function stop_watch()
         state.watch_timer = nil
     end
     state.diff_seen = false
+    state.was_busy = false
 end
 
--- Poll while the full float is open and collapse it to the corner notification
--- the moment an edit-approval diff appears. Edge-triggered: it fires once per
--- diff and re-arms only after the diff clears, so a manual restore (to review
--- the diff) is never fought.
+-- Poll the live terminal/diff state and move the float in step with the cycle:
+--   * float open + an edit-approval diff appears  -> minimize (the diff would
+--     otherwise be hidden behind the float);
+--   * float minimized + Claude stops being busy   -> restore (Claude is now
+--     waiting for the user), UNLESS a diff is still up (the user reviews that).
+-- "Busy" = actively working OR a diff pending. Restore is edge-triggered on the
+-- busy->idle transition, so a manual minimize while Claude is already idle is
+-- never fought.
 local function start_watch()
     stop_watch()
-    if not mini.auto_minimize_on_diff then
+    if not mini.auto_minimize_on_diff and not mini.auto_restore_on_input then
         return
     end
+    state.was_busy = false
     state.watch_timer = uv.new_timer()
     state.watch_timer:start(
         mini.watch_ms,
@@ -363,18 +417,21 @@ local function start_watch()
                 stop_watch()
                 return
             end
-            -- Only act while the big float is showing; ignore when minimized.
-            if not win_valid() then
-                return
-            end
-            if diff_pending() then
-                if not state.diff_seen then
-                    state.diff_seen = true
-                    M.minimize()
+            local has_diff = diff_pending()
+            local busy = has_diff or is_working()
+            if win_valid() then
+                if mini.auto_minimize_on_diff and has_diff then
+                    if not state.diff_seen then
+                        state.diff_seen = true
+                        M.minimize()
+                    end
+                elseif not has_diff then
+                    state.diff_seen = false
                 end
-            else
-                state.diff_seen = false
+            elseif mini.auto_restore_on_input and state.was_busy and not busy then
+                M.restore()
             end
+            state.was_busy = busy
         end)
     )
 end
