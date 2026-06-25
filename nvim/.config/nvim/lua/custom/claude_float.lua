@@ -3,7 +3,8 @@
 -- opens in a floating window instead of a Snacks split.
 --
 -- Implements the claudecode.nvim terminal provider interface:
---   setup, open, close, simple_toggle, focus_toggle, get_active_bufnr, is_available
+--   setup, open, close, simple_toggle, focus_toggle, get_active_bufnr,
+--   is_available, ensure_visible
 --
 -- Extra (non-interface) API used by keymaps:
 --   minimize()    hide the big float, show a small corner notification
@@ -26,6 +27,10 @@ local state = {
     watch_timer = nil,
     diff_seen = false,
     was_busy = false,
+    -- Timestamp (uv.now ms) of the busy->idle transition, for debouncing the
+    -- auto-restore so the brief lull after a diff is resolved doesn't pop the
+    -- float before Claude has resumed.
+    idle_since = nil,
 }
 
 -- Tuning for the corner notification.
@@ -41,8 +46,12 @@ local mini = {
     -- which the float would otherwise cover, is visible).
     auto_minimize_on_diff = true,
     -- Auto-restore the float when Claude finishes and waits for input (but not
-    -- while a diff is up -- you are reviewing that).
+    -- while a diff is up -- you are reviewing that). Restore only triggers once
+    -- Claude has been idle for `restore_idle_ms` straight, so the float comes
+    -- back when interaction is requested or the task is done -- NOT during the
+    -- momentary lull between a diff being approved/denied and Claude resuming.
     auto_restore_on_input = true,
+    restore_idle_ms = 1200, -- sustained idle required before auto-restoring
     watch_ms = 300, -- how often the watcher polls
 }
 
@@ -392,16 +401,20 @@ local function stop_watch()
     end
     state.diff_seen = false
     state.was_busy = false
+    state.idle_since = nil
 end
 
 -- Poll the live terminal/diff state and move the float in step with the cycle:
 --   * float open + an edit-approval diff appears  -> minimize (the diff would
 --     otherwise be hidden behind the float);
---   * float minimized + Claude stops being busy   -> restore (Claude is now
---     waiting for the user), UNLESS a diff is still up (the user reviews that).
--- "Busy" = actively working OR a diff pending. Restore is edge-triggered on the
--- busy->idle transition, so a manual minimize while Claude is already idle is
--- never fought.
+--   * float minimized + Claude settles idle        -> restore (Claude is now
+--     waiting for the user or done), UNLESS a diff is still up (review that).
+-- "Busy" = actively working OR a diff pending. Restore waits for SUSTAINED idle
+-- (`restore_idle_ms`) after a busy->idle transition: the brief lull between a
+-- diff being approved/denied and Claude resuming work is not enough to pop the
+-- float -- it only returns when interaction is requested or the task completes.
+-- The transition gating also means a manual minimize while Claude is already
+-- idle is never fought (no busy->idle edge => idle_since never starts).
 local function start_watch()
     stop_watch()
     if not mini.auto_minimize_on_diff and not mini.auto_restore_on_input then
@@ -428,8 +441,22 @@ local function start_watch()
                 elseif not has_diff then
                     state.diff_seen = false
                 end
-            elseif mini.auto_restore_on_input and state.was_busy and not busy then
-                M.restore()
+            elseif mini.auto_restore_on_input then
+                -- Restore only after Claude has been idle long enough to be sure
+                -- it is waiting for input / done -- not during the lull right
+                -- after a diff is resolved (Claude resumes within that window
+                -- and clears idle_since before the threshold).
+                if busy then
+                    state.idle_since = nil
+                elseif state.idle_since == nil then
+                    -- Start the idle clock only on a real busy->idle transition.
+                    if state.was_busy then
+                        state.idle_since = uv.now()
+                    end
+                elseif (uv.now() - state.idle_since) >= mini.restore_idle_ms then
+                    state.idle_since = nil
+                    M.restore()
+                end
             end
             state.was_busy = busy
         end)
@@ -558,16 +585,12 @@ function M.open(cmd_string, env_table, effective_config, focus)
     if buf_valid() then
         if not win_valid() then
             -- Process alive but hidden: reattach the buffer to a new float.
-            local original_win = vim.api.nvim_get_current_win()
             open_window()
-            if focus ~= false then
-                focus_window()
-            elseif vim.api.nvim_win_is_valid(original_win) then
-                vim.api.nvim_set_current_win(original_win)
-            end
-        elseif focus ~= false then
-            focus_window()
         end
+        -- Opening or maximizing the float always lands you in Claude. (The
+        -- no-focus "ensure visible" path is handled by M.ensure_visible, which
+        -- never reaches here, so this is unconditionally a deliberate open.)
+        focus_window()
     else
         spawn(cmd_string, env_table, effective_config, focus)
     end
@@ -620,6 +643,25 @@ end
 
 function M.is_available()
     return true
+end
+
+-- claudecode.nvim calls this (terminal.ensure_visible) to keep Claude on screen
+-- WITHOUT stealing focus -- notably during diff cleanup after an accept/deny.
+-- We deliberately do NOT pop the big float here: when minimized we stay
+-- minimized, so the float only returns once our watcher decides Claude is
+-- waiting for input or done. We just make sure Claude stays represented -- as
+-- the corner notification when nothing is currently shown. (Defining this also
+-- short-circuits the plugin's fallback, which would otherwise reopen the float
+-- via open(focus=false).)
+function M.ensure_visible()
+    if win_valid() or mini_win_valid() then
+        return true
+    end
+    if buf_valid() then
+        show_mini()
+        return true
+    end
+    return false
 end
 
 --- Notification controls (bound from keymaps) -------------------------------
