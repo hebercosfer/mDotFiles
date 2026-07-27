@@ -3,10 +3,7 @@
 # for examples
 
 # If not running interactively, don't do anything
-case $- in
-    *i*) ;;
-      *) return;;
-esac
+[ -z "$PS1" ] && return
 
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
@@ -16,8 +13,8 @@ HISTCONTROL=ignoreboth
 shopt -s histappend
 
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-HISTSIZE=5000
-HISTFILESIZE=10000
+HISTSIZE=10000
+HISTFILESIZE=20000
 
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
@@ -31,46 +28,57 @@ shopt -s checkwinsize
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 
 # set variable identifying the chroot you work in (used in the prompt below)
-if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
-    debian_chroot=$(cat /etc/debian_chroot)
+# Works on any distro: honour /etc/debian_chroot where it exists (Debian/Ubuntu),
+# otherwise detect a chroot generically by comparing / with PID 1's root.
+if [ -z "$chroot_name" ]; then
+    if [ -r /etc/debian_chroot ]; then
+        chroot_name=$(cat /etc/debian_chroot)
+    else
+        # Only trust this when /proc/1/root is readable (avoids false positives
+        # for non-root users, where stat of PID 1's root yields nothing).
+        root_ids=$(stat -c %d:%i / 2>/dev/null)
+        init_ids=$(stat -c %d:%i /proc/1/root/. 2>/dev/null)
+        if [ -n "$init_ids" ] && [ "$root_ids" != "$init_ids" ]; then
+            chroot_name=chroot
+        fi
+        unset root_ids init_ids
+    fi
 fi
 
-export TERM=screen-256color
 # set a fancy prompt (non-color, unless we know we "want" color)
 case "$TERM" in
-    screen-color|*-256color) color_prompt=yes;;
+xterm-color) color_prompt=yes ;;
 esac
 
 # uncomment for a colored prompt, if the terminal has the capability; turned
 # off by default to not distract the user: the focus in a terminal window
 # should be on the output of commands, not on the prompt
-#force_color_prompt=yes
+force_color_prompt=yes
 
 if [ -n "$force_color_prompt" ]; then
     if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
-	# We have color support; assume it's compliant with Ecma-48
-	# (ISO/IEC-6429). (Lack of such support is extremely rare, and such
-	# a case would tend to support setf rather than setaf.)
-	color_prompt=yes
+        # We have color support; assume it's compliant with Ecma-48
+        # (ISO/IEC-6429). (Lack of such support is extremely rare, and such
+        # a case would tend to support setf rather than setaf.)
+        color_prompt=yes
     else
-	color_prompt=
+        color_prompt=
     fi
 fi
 
 if [ "$color_prompt" = yes ]; then
-    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+    PS1='${chroot_name:+($chroot_name)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
 else
-    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+    PS1='${chroot_name:+($chroot_name)}\u@\h:\w\$ '
 fi
 unset color_prompt force_color_prompt
 
 # If this is an xterm set the title to user@host:dir
 case "$TERM" in
-xterm*|rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+xterm* | rxvt*)
+    PS1="\[\e]0;${chroot_name:+($chroot_name)}\u@\h: \w\a\]$PS1"
     ;;
-*)
-    ;;
+*) ;;
 esac
 
 # enable color support of ls and also add handy aliases
@@ -84,9 +92,6 @@ if [ -x /usr/bin/dircolors ]; then
     alias fgrep='fgrep --color=auto'
     alias egrep='egrep --color=auto'
 fi
-
-# colored GCC warnings and errors
-#export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
 
 # some more ls aliases
 alias ll='ls -alF'
@@ -109,43 +114,125 @@ fi
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).
-if ! shopt -oq posix; then
-  if [ -f /usr/share/bash-completion/bash_completion ]; then
-    . /usr/share/bash-completion/bash_completion
-  elif [ -f /etc/bash_completion ]; then
+if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
     . /etc/bash_completion
-  fi
 fi
 
-function parse_git_dirty {
-  [[ $(git status --porcelain 2> /dev/null) ]] && echo "*"
+#--------------------------------------------------8<----------------------------------------------
+
+# Based upon the following gists:
+# <https://gist.github.com/henrik/31631>
+# <https://gist.github.com/srguiwiz/de87bf6355717f0eede5>
+# Modified by me, using ideas from comments on those gists.
+#
+# License: MIT, unless the authors of those two gists object :)
+
+git_branch() {
+    # -- Finds and outputs the current branch name by parsing the list of
+    #    all branches
+    # -- Current branch is identified by an asterisk at the beginning
+    # -- If not in a Git repository, error message goes to /dev/null and
+    #    no output is produced
+    git branch --no-color 2>/dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'
 }
 
-function parse_git_branch {
-  git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e "s/* \(.*\)/ (\1$(parse_git_dirty))/"
+git_status() {
+    # Outputs a series of indicators based on the status of the
+    # working directory:
+    # + changes are staged and ready to commit
+    # ! unstaged changes are present
+    # ? untracked files are present
+    # S changes have been stashed
+    # P local commits need to be pushed to the remote
+    local status="$(git status --porcelain 2>/dev/null)"
+    local output=''
+    [[ -n $(egrep '^[MADRC]' <<<"$status") ]] && output="$output+"
+    [[ -n $(egrep '^.[MD]' <<<"$status") ]] && output="$output!"
+    [[ -n $(egrep '^\?\?' <<<"$status") ]] && output="$output?"
+    [[ -n $(git stash list 2>/dev/null) ]] && output="${output}S"
+    [[ -n $(git log --branches --not --remotes 2>/dev/null) ]] && output="${output}P"
+    [[ -n $output ]] && output="|$output" # separate from branch name
+    echo $output
 }
 
-#export PS1="\n\t \[\033[32m\]\w\[\033[33m\]\$(parse_git_branch)\[\033[00m\] $ "
-#PS1="\[\e[97;44m\] \u \[\e[30;43m\] \w\[\e[m\] \[\033[00m\]\$(parse_git_branch) $ \[\e[0m\] "
-#export PS1="\n \[\e[97;44m\] \u \[\e[30;43m\] \w \[\e[m \n \[\e[0;38;5;196m\]$(parse_git_branch)\[\033[00m\] [\[\e[0;38;5;45m\]\$\[\e[0m\]] ->  "
+git_color() {
+    # Receives output of git_status as argument; produces appropriate color
+    # code based on status of working directory:
+    # - White if everything is clean
+    # - Green if all changes are staged
+    # - Red if there are uncommitted changes with nothing staged
+    # - Yellow if there are both staged and unstaged changes
+    local staged=$([[ $1 =~ \+ ]] && echo yes)
+    local dirty=$([[ $1 =~ [!\?] ]] && echo yes)
+    if [[ -n $staged ]] && [[ -n $dirty ]]; then
+        echo -e '\033[1;33m' # bold yellow
+    elif [[ -n $staged ]]; then
+        echo -e '\033[1;32m' # bold green
+    elif [[ -n $dirty ]]; then
+        echo -e '\033[1;31m' # bold red
+    else
+        echo -e '\033[1;37m' # bold white
+    fi
+}
 
-PS1_DATE='\[\e[0;38;5;220m\]\T'
-PS1_USER='\[\e[0;38;5;45m\]\u\[\e[0m\]'
-PS1_HOSTNAME='\[\e[0;37m\]\h'
-PS1_WD='\[\e[0m\][\[\e[0;38;5;220m\]\w\[\e[0m\]]'
-PS1_GIT='\[\e[0;38;5;253m\]branch:\[\e[0;38;5;196m\]$(parse_git_branch)\[\e[0m\]'
-PS1_PROMPT=' '$PS1_GIT' [\[\e[0;38;5;45m\]\$\[\e[0m\]] ->  '
-export PS1='\n| '$PS1_DATE' '$PS1_USER'@'$PS1_HOSTNAME' '$PS1_WD'\n|--'$PS1_PROMPT
+git_prompt() {
+    # First, get the branch name...
+    local branch=$(git_branch)
+    # Empty output? Then we're not in a Git repository, so bypass the rest
+    # of the function, producing no output
+    if [[ -n $branch ]]; then
+        local state=$(git_status)
+        local color=$(git_color $state)
+        # Now output the actual code to insert the branch and status
+        echo -e "\x01$color\x02[$branch$state]\x01\033[00m\x02" # last bit resets color
+    fi
+}
 
+git_title() {
+    # First, get the branch name...
+    local branch=$(git_branch)
+    # Empty output? Then we're not in a Git repository, so bypass the rest
+    # of the function, producing no output
+    if [[ -n $branch ]]; then
+        local state=$(git_status)
+        local color=$(git_color $state)
+        # Now output the actual code to insert the branch and status
+        echo -e "[$branch$state]"
+    fi
+}
+
+git_termtitle() {
+    local branch=$(git_branch)
+    local staged=$(git status --porcelain 2>/dev/null | grep ^.M | wc -l)
+    local unstaged=$(git status --porcelain 2>/dev/null | grep ^M. | wc -l)
+    if [[ -z $branch ]]; then
+        echo -e "(not in git repo)"
+    fi
+    if [[ -n $branch ]]; then
+        # show the branch and no. of staged and unstaged changes
+        echo -e "$branch - $staged staged - $unstaged unstaged"
+    fi
+}
+
+# Sample prompt declaration based off of the default Ubuntu 14.04.1 color
+# prompt. Tweak as you see fit, or just stick "$(git_prompt)" into your
+# favorite prompt.
+PS1='$chroot_name:\[\033[01;34m\]\w$(git_prompt)\[\033[00m\]\$ '
+
+# Set the ubuntu (gnome) terminal title
+PROMPT_COMMAND='echo -ne "\033]0;$(git_termtitle) - ${PWD/$HOME/~}\007"'
+
+eval "$(starship init bash)"
 bind -f ~/.inputrc
-shopt -s histappend
-#export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
-export PATH=~/Workspace/nvim-linux64/bin:~/.local/kitty.app/bin:$PATH
-source /usr/share/fzf/shell/key-bindings.bash
-source /usr/share/fzf/shell/completion.bash
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+source ~/fzf-bash-completion.sh
+bind -x '"\t": fzf_bash_completion'
+export QT_QPA_PLATFORM=wayland
+. "$HOME/.cargo/env"
 
 # --- fastfetch (WSL, interactive shells only) ---
 if [[ $- == *i* ]] && [[ -z "$FASTFETCH_SHOWN" ]]; then
-  export FASTFETCH_SHOWN=1
-  fastfetch
+    export FASTFETCH_SHOWN=1
+    fastfetch
 fi
