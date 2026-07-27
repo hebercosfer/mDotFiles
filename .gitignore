@@ -1,1 +1,9 @@
 nvim/.config/nvim/lazy-lock.json
+
+# Claude Code: allowlist only. Everything else under ~/.claude is either secret
+# (.credentials.json), machine-specific (plugins/ install paths, .claude.json),
+# or runtime state (projects/, sessions/, history.jsonl, ~52MB). If `stow claude`
+# ever folds ~/.claude into a symlink to this repo, this keeps that out of git.
+claude/.claude/*
+!claude/.claude/settings.json
+!claude/.claude/commands/

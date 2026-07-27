@@ -229,7 +229,7 @@ bind -f ~/.inputrc
 source ~/fzf-bash-completion.sh
 bind -x '"\t": fzf_bash_completion'
 export QT_QPA_PLATFORM=wayland
-. "$HOME/.cargo/env"
+[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
 # --- fastfetch (WSL, interactive shells only) ---
 if [[ $- == *i* ]] && [[ -z "$FASTFETCH_SHOWN" ]]; then
