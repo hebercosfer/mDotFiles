@@ -17,11 +17,11 @@ vim.keymap.set("v", "<space>x", ":lua<CR>", { desc = "Executing current lua sele
 --  Try it with `yap` in normal mode
 --  See `:help vim.highlight.on_yank()`
 vim.api.nvim_create_autocmd("TextYankPost", {
-    desc = "Highlight when yanking (copying) text",
-    group = vim.api.nvim_create_augroup("kickstart-highlight-yank", { clear = true }),
-    callback = function()
-        vim.highlight.on_yank()
-    end,
+  desc = "Highlight when yanking (copying) text",
+  group = vim.api.nvim_create_augroup("kickstart-highlight-yank", { clear = true }),
+  callback = function()
+    vim.highlight.on_yank()
+  end,
 })
 
 -- Navigate vim panes better
@@ -48,10 +48,10 @@ vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "[y]ank continuosly"
 vim.keymap.set({ "n", "v" }, "<leader>Y", [["+Y]], { desc = "[Y]ank all line continuosly" })
 vim.keymap.set({ "n", "v" }, "<leader>p", [["+p]], { desc = "[p]aste continuosly" })
 vim.keymap.set(
-    "v",
-    "<leader>rs",
-    '"hy:%s/<C-r>h//gi<left><left><left>',
-    { desc = "[R]eplace [s]election on file" }
+  "v",
+  "<leader>rs",
+  '"hy:%s/<C-r>h//gi<left><left><left>',
+  { desc = "[R]eplace [s]election on file" }
 )
 
 vim.keymap.set("n", "<leader>f", vim.lsp.buf.format)

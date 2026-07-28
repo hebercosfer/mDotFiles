@@ -18,7 +18,7 @@ local M = {
     event = "VeryLazy",
     -- priority = 1000,
     config = function()
-      vim.cmd.colorscheme "tokyonight"
+      -- vim.cmd.colorscheme "tokyonight"
     end,
   },
   {
@@ -84,7 +84,7 @@ local M = {
       -- catppuccin-frappe
       -- catppuccin-macchiato
       -- catppuccin-mocha
-      -- vim.cmd.colorscheme("catppuccin-mocha")
+      vim.cmd.colorscheme("catppuccin-mocha")
     end,
   },
   {
@@ -102,6 +102,19 @@ local M = {
       -- vim.cmd.colorscheme("nightfox")
     end,
   },
+  -- {
+  --   -- https://github.com/folke/styler.nvim
+  --   "folke/styler.nvim",
+  --   config = function()
+  --     require("styler").setup({
+  --       themes = {
+  --         markdown = { colorscheme = "tokyonight-moon" },
+  --         rst = { colorscheme = "tokyonight-moon" },
+  --         help = { colorscheme = "material-oceanic" },
+  --       },
+  --     })
+  --   end,
+  -- },
 }
 
 return M

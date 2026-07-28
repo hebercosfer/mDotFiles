@@ -1,105 +1,85 @@
 return {
   {
-    "nvim-lua/plenary.nvim",
-  },
-  {
-    "nvim-telescope/telescope-file-browser.nvim",
-  },
-  {
-    "benfowler/telescope-luasnip.nvim",
-  },
-  {
-    "nvim-telescope/telescope-symbols.nvim",
-  },
-  {
     "nvim-telescope/telescope.nvim",
     tag = "0.1.8",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+    },
     config = function()
       local telescope = require("telescope")
       local builtin = require("telescope.builtin")
 
-      telescope.load_extension("fzf")
-      telescope.load_extension("luasnip")
-      telescope.load_extension("file_browser")
-
       telescope.setup({
-        -- defaults = {
-        -- 	file_ignore_patterns = {
-        -- 		"^.git/",
-        -- 	},
-        -- },
+        pickers = {
+          find_files = {
+            theme = "ivy",
+          },
+          coloscheme = {
+            theme = "ivy",
+            enable_preview = true,
+          },
+        },
         extensions = {
           fzf = {},
-          file_browser = {},
         },
       })
-      vim.keymap.set("n", "<leader>lf", function()
-        builtin.lsp_references(require("telescope.themes").get_ivy({
-          winblend = 20,
-        }))
-      end, { desc = "[l]sp: re[f]erences in telescope" })
-      vim.keymap.set("n", "<leader>sd", function()
-        builtin.lsp_document_symbols(require("telescope.themes").get_ivy({
-          winblend = 20,
-        }))
-      end, { desc = "lsp: search [s]symbols in [d]ocument" })
-      vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "lsp: [f]ind [f]iles" })
-      vim.keymap.set("n", "<leader>lg", builtin.live_grep, { desc = "lsp: [l]ive [g]rep" })
-      vim.keymap.set("n", "<leader>of", builtin.oldfiles, {})
-      vim.keymap.set({ "n" }, "<leader>cl", function()
-        builtin.colorscheme(require("telescope.themes").get_ivy({
-          enable_preview = true,
-          winblend = 30,
-        }))
-      end, { desc = "Chose [c]o[l]ourschemes", noremap = true })
 
-      local current_buffer_fuzzy_find = function()
-        -- You can pass additional configuration to telescope to change theme, layout, etc.
-        builtin.current_buffer_fuzzy_find(require("telescope.themes").get_dropdown({
-          winblend = 10,
-          previewer = false,
-          skip_empty_lines = true,
-        }))
-      end
+      telescope.load_extension("fzf")
 
-      vim.keymap.set({ "n" }, "<leader>/", function()
-        current_buffer_fuzzy_find()
-      end, { desc = "[/] Fuzzy search current buffer" })
+      vim.keymap.set(
+        "n",
+        "<leader>fh",
+        builtin.help_tags,
+        { desc = "Telescope: [f]ind [h]elp tags" }
+      )
+      vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "Telescope: [f]ind [f]iles" })
+      vim.keymap.set(
+        "n",
+        "<leader>fr",
+        builtin.resume,
+        { desc = "Telescope: [f]ind files [r]esume" }
+      )
+      vim.keymap.set(
+        "n",
+        "<leader>fd",
+        builtin.lsp_definitions,
+        { desc = "Telescope: [f]ind [d]efinitions" }
+      )
+      vim.keymap.set(
+        "n",
+        "<leader>fs",
+        builtin.lsp_document_symbols,
+        { desc = "Telescope: [f]ind [s]ymbols" }
+      )
+      vim.keymap.set(
+        "n",
+        "<leader>fm",
+        builtin.lsp_implementations,
+        { desc = "Telescope: [f]ind i[m]plementations" }
+      )
 
-      vim.keymap.set({ "n" }, "<leader>cl", function()
-        builtin.colorscheme(require("telescope.themes").get_ivy({
-          enable_preview = true,
-          winblend = 30,
-        }))
-      end, { desc = "Chose [c]o[l]ourschemes" })
+      vim.keymap.set("n", "<leader>fc", function()
+        builtin.find_files({
+          cwd = vim.fn.stdpath("config"),
+        })
+      end, { desc = "Telescope: [f]ind [c]onfig NeoVim files" })
 
-      vim.keymap.set({ "n" }, "\\s", function()
-        builtin.resume()
-      end, { desc = "Re[s]ume telescope" })
+      vim.keymap.set("n", "<leader>bf", builtin.buffers, { desc = "Telescope: [f]ind [b]uffers" })
 
-      require("custom.multigrep").setup()
+      vim.keymap.set("n", "<leader>fn", function()
+        builtin.find_files({
+          cwd = vim.fs.joinpath(vim.fn.stdpath("data"), "lazy"),
+        })
+      end, { desc = "Telescope: [f]ind internal [n]eoVim files" })
+      vim.keymap.set(
+        { "n" },
+        "<leader>cl",
+        builtin.colorscheme,
+        { desc = "Chose [c]o[l]ourschemes" }
+      )
+
+      require("util.multigrep").setup()
     end,
-    dependencies = {
-      {
-        "nvim-lua/plenary.nvim",
-      },
-      {
-        -- spec elsewhere
-        "folke/which-key.nvim",
-      },
-      {
-        "nvim-tree/nvim-web-devicons",
-      },
-      { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' },
-      {
-        "nvim-telescope/telescope-file-browser.nvim",
-      },
-      {
-        "benfowler/telescope-luasnip.nvim",
-      },
-      {
-        "nvim-telescope/telescope-symbols.nvim",
-      },
-    },
   },
 }
