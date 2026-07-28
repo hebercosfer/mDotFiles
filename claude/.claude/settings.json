@@ -3,6 +3,9 @@
     "type": "command",
     "command": "ccstatusline"
   },
+  "env": {
+    "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt"
+  },
   "enabledPlugins": {
     "clangd-lsp@claude-plugins-official": true,
     "lua-lsp@claude-plugins-official": true,
