@@ -1,9 +1,10 @@
 return {
   "coder/claudecode.nvim",
+  dependencies = { "hebercosfer/floating-claude.nvim" },
   opts = function()
     return {
       terminal = {
-        provider = require("util.claude_float"),
+        provider = require("floating-claude").provider,
       },
       diff_opts = {
         -- Open the diff in its own full-screen tab instead of splitting
@@ -23,7 +24,7 @@ return {
     {
       "<leader>an",
       function()
-        require("util.claude_float").toggle_mini()
+        require("floating-claude").toggle_mini()
       end,
       desc = "Minimize Claude to notification",
     },
