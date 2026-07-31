@@ -4,8 +4,11 @@
   commit in a new tmux window so my own editor opens and I confirm it myself — I'm always
   in tmux:
   ```
-  tmux new-window -n commit -c <repo> "git commit -e -F /tmp/cmsg.txt -- <paths>"
+  tmux new-window -n commit -c <repo> "git commit -e -v -F /tmp/cmsg.txt -- <paths>"
   ```
+  - Keep `-v`: it appends the full staged diff below a scissors line, on top of git's
+    usual template listing what is and isn't included, so the editor doubles as a last
+    review before the commit lands. Everything below the scissors line is ignored.
   - Write `/tmp/cmsg.txt` with a shell heredoc, **not** the Write tool — Write opens a
     diff for approval, which is pointless when I edit the message in the tmux window
     anyway. Don't show me a diff for a commit message.
