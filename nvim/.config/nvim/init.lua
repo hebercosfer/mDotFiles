@@ -25,3 +25,4 @@ else
 end
 
 require("config.lsp")
+require("config.merge")
