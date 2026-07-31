@@ -27,7 +27,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
       "n",
       "grd",
       "<Cmd>lua vim.lsp.buf.definition()<Cr>",
-      { desc = "Clangd: [S]how Symbol [I]nfo" }
+      { desc = "LSP: [G]o to [R]eference [D]efinition" }
     )
   end,
 })
