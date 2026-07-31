@@ -5,3 +5,29 @@
 [push]
 	autoSetupRemote = true
 	default = current
+[diff]
+	tool = nvimdiff
+[difftool]
+	# Skips the "Launch 'nvimdiff' [Y/n]?" prompt before every single file.
+	# Note this belongs under [difftool], not [diff] -- git ignores diff.prompt.
+	prompt = false
+[merge]
+	tool = nvimdiff
+	# Forces Git to include the common ancestor (BASE) context in conflict markers
+	conflictstyle = diff3
+[mergetool]
+	# Same prompt skip as above, but for the merge side
+	prompt = false
+
+	# Don't leave a *.orig backup next to every file you resolve
+	keepBackup = false
+
+# Git ships the nvimdiff backend, so no cmd is needed here. The default layout is
+# a top row of LOCAL | BASE | REMOTE over a full-width MERGED buffer. Alternatives,
+# if this feels too busy:
+#   nvimdiff1 -> 2 panes (LOCAL, REMOTE)
+#   nvimdiff2 -> 3 panes (LOCAL, MERGED, REMOTE)
+#   nvimdiff3 -> MERGED only, others loaded as hidden buffers
+[mergetool "nvimdiff"]
+	# A clean :wqa means the file is resolved; :cq marks it as still conflicted
+	trustExitCode = true
