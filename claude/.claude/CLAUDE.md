@@ -6,8 +6,13 @@
   ```
   tmux new-window -n commit -c <repo> "git commit -e -F /tmp/cmsg.txt -- <paths>"
   ```
+  - Write `/tmp/cmsg.txt` with a shell heredoc, **not** the Write tool — Write opens a
+    diff for approval, which is pointless when I edit the message in the tmux window
+    anyway. Don't show me a diff for a commit message.
   - Use the pathspec form (`-- <paths>`) rather than `git add` first, so aborting leaves
     my index untouched. Sanity-check with `git commit --dry-run -F ... -- <paths>` first.
+    Untracked files are the exception: pathspecs can't match them, so they need
+    `git add -N <path>` first (`git reset` undoes that if I abort).
   - Do **not** append `; exec bash` or anything else that holds the window open — let it
     close itself once the commit finishes.
   - Never sweep unrelated modified files into the pathspec.
