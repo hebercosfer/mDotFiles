@@ -32,6 +32,14 @@
         "type": "weekly-usage"
       },
       {
+        "id": "7b6bdd98-7695-438d-b351-eb8322b8f76b",
+        "type": "separator"
+      },
+      {
+        "id": "33d55d3b-3f79-4147-970f-7636f2a55438",
+        "type": "reset-timer"
+      },
+      {
         "id": "e69a4cf4-342a-4b5a-b04a-d4af1b92faff",
         "type": "separator"
       },
@@ -46,6 +54,7 @@
   "flexMode": "full-minus-40",
   "compactThreshold": 60,
   "colorLevel": 2,
+  "defaultPaddingSide": "both",
   "inheritSeparatorColors": false,
   "globalBold": false,
   "gitCacheTtlSeconds": 5,
