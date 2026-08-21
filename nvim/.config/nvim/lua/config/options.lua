@@ -34,6 +34,14 @@ vim.keymap.set("t", "<c-j>", "<C-\\><C-n>:TmuxNavigateDown<CR>")
 vim.keymap.set("t", "<c-h>", "<C-\\><C-n>:TmuxNavigateLeft<CR>")
 vim.keymap.set("t", "<c-l>", "<C-\\><C-n>:TmuxNavigateRight<CR>")
 vim.keymap.set("n", "<c-s>", ":w!<CR>")
+vim.keymap.set("n", "<C-q>", function()
+  local started_as_diff = vim.iter(vim.v.argv):any(function(a)
+    return a == "-d"
+  end)
+  if vim.o.diff and started_as_diff then
+    vim.cmd("qa")
+  end
+end, { desc = "Quit all when opened as diff application" })
 
 vim.keymap.set("n", "U", "<C-r>")
 vim.wo.number = true
