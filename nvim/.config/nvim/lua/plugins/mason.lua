@@ -20,6 +20,7 @@ return {
     config = function()
       require("mason-lspconfig").setup({
         ensure_installed = { "lua_ls", "clangd", "cmake", "regal" },
+        automatic_enable = { exclude = { "stylua" } },
       })
     end,
   },

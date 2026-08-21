@@ -1,6 +1,8 @@
 return {
   "coder/claudecode.nvim",
-  dependencies = { "hebercosfer/floating-claude.nvim" },
+  dependencies = {
+    { "hebercosfer/floating-claude.nvim" },
+  },
   opts = function()
     return {
       terminal = {
