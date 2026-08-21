@@ -21,7 +21,7 @@ return { -- Autoformat
         return
       end
 
-      local disable_filetypes = { c = true, cpp = true, cmake = false }
+      local disable_filetypes = { c = true, cpp = true, cmake = false, lua = true }
       return {
         timeout_ms = 500,
         lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
