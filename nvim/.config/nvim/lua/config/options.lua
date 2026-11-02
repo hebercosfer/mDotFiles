@@ -64,3 +64,31 @@ vim.keymap.set("n", "<leader>dn", "<cmd>lnext<CR>")
 vim.keymap.set("n", "<leader>dp", "<cmd>lprev<CR>")
 
 vim.keymap.set("v", "/", '"fy/\\V<C-R>f<CR>')
+
+vim.keymap.set("n", "<C-q>", function()
+  local started_as_diff = vim.iter(vim.v.argv):any(function(a)
+    return a == "-d"
+  end)
+  if vim.o.diff and started_as_diff then
+    vim.cmd("qa")
+  end
+end, { desc = "Quit all when opened as diff application" })
+
+-- Use real tabs for Rego files
+vim.filetype.add({ extension = { rego = "rego" } })
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "rego",
+  callback = function()
+    vim.opt_local.expandtab = false
+    vim.opt_local.tabstop = 4
+    vim.opt_local.shiftwidth = 4
+  end,
+})
+
+vim.opt.list = true
+vim.opt.listchars = {
+  space = "·", -- Display regular spaces as a middle dot
+  tab = "» ", -- Display tabs as a right angle and space
+  trail = "•", -- Display trailing spaces at the end of lines
+  nbsp = "␣", -- Display non-breaking spaces
+}

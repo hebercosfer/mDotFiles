@@ -19,7 +19,27 @@ return {
     "williamboman/mason-lspconfig.nvim",
     config = function()
       require("mason-lspconfig").setup({
-        ensure_installed = { "lua_ls", "clangd" },
+        ensure_installed = { "lua_ls", "clangd", "cmake", "regal" },
+      })
+    end,
+  },
+  {
+    -- https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim
+    "WhoIsSethDaniel/mason-tool-installer.nvim",
+    config = function()
+      require("mason-tool-installer").setup({
+        ensure_installed = {
+          -- Lua
+          "stylua",
+          -- C/C++
+          "clang-format",
+          -- Shell
+          "shfmt",
+          -- HTML
+          "djlint",
+          -- Rego
+          "opa",
+        },
       })
     end,
   },

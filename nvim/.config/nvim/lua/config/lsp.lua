@@ -32,7 +32,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
   end,
 })
 
-vim.lsp.enable({ "lua_ls", "clangd", "cmake", "qmlls" })
+vim.lsp.enable({ "lua_ls", "clangd", "cmake", "qmlls", "regal" })
 vim.diagnostic.config({ virtual_text = true })
 vim.keymap.set("i", "<c-space>", function()
   vim.lsp.completion.get()
