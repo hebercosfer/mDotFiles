@@ -1,3 +1,10 @@
+local lsp_display_names = {
+  lua_ls = "Lua",
+  clangd = "C/C++",
+  cmake = "CMake",
+  qmlls = "QML",
+}
+
 vim.api.nvim_create_autocmd("LspAttach", {
   callback = function(ev)
     local client = vim.lsp.get_client_by_id(ev.data.client_id)
@@ -5,7 +12,10 @@ vim.api.nvim_create_autocmd("LspAttach", {
       return
     end
 
-    vim.notify("Attached to LSP " .. client.name, vim.log.levels.INFO)
+    vim.notify(
+      "Attached to LSP: " .. (lsp_display_names[client.name] or client.name),
+      vim.log.levels.INFO
+    )
     if client:supports_method("textDocument/completion") then
       vim.lsp.completion.enable(true, client.id, ev.buf, { autotrigger = false })
     end
