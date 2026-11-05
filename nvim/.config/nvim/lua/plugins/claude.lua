@@ -4,7 +4,7 @@
 -- Every option below is written out at its default, to change in place.
 return {
   "hebercosfer/floating-claude.nvim",
-  branch = "fix/HooksReviewMinors",
+  branch = "release/0.5.0",
   dependencies = { "coder/claudecode.nvim" },
   -- Its keys are mapped by setup(), not by lazy.nvim, so load it once the UI
   -- is up rather than on a key press.
@@ -52,7 +52,8 @@ return {
       -- a request), "request" (requests only), false (never).
       restore_on_input = "idle",
       -- What brings a hidden Claude back as the corner: "request", "idle" (a
-      -- finished turn too), false (never).
+      -- finished turn too), false (never). Reading the screen, which cannot
+      -- tell a request from a finished turn, both levels act on either.
       show_hidden = "request",
       minimize_on_leave = true, -- minimize when focus leaves the float
       restore_on_enter = true, -- restore when the corner is entered (clicked)
