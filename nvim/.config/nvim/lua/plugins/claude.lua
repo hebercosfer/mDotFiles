@@ -4,11 +4,31 @@
 -- Every option below is written out at its default, to change in place.
 return {
   "hebercosfer/floating-claude.nvim",
-  branch = "release/0.5.0",
   dependencies = { "coder/claudecode.nvim" },
   -- Its keys are mapped by setup(), not by lazy.nvim, so load it once the UI
   -- is up rather than on a key press.
   event = "VeryLazy",
+  -- The unified diff below still splits its tab: claudecode.nvim opens the tab
+  -- with an empty window, then vsplits the diff beside it. Close everything in
+  -- that tab but the diff, so it fills the screen. Floats (the corner) stay,
+  -- and a diff in your current tab (no tab_number) keeps your windows.
+  -- Upstream closes a new-tab diff with :tabclose, so nothing misses the window.
+  init = function()
+    vim.api.nvim_create_autocmd("User", {
+      pattern = "ClaudeCodeDiffOpened",
+      callback = function(args)
+        local d = args.data or {}
+        if not d.tab_number or not (d.diff_window and vim.api.nvim_win_is_valid(d.diff_window)) then
+          return
+        end
+        for _, w in ipairs(vim.api.nvim_tabpage_list_wins(d.tab_number)) do
+          if w ~= d.diff_window and vim.api.nvim_win_get_config(w).relative == "" then
+            pcall(vim.api.nvim_win_close, w, false)
+          end
+        end
+      end,
+    })
+  end,
   opts = {
     -- The big centered float that hosts Claude.
     float = {
@@ -83,10 +103,14 @@ return {
     },
 
     -- claudecode.nvim's own options, passed to its setup(). The terminal
-    -- provider is set for you; the two diff options are what floating-claude
+    -- provider is set for you; the two tab options are what floating-claude
     -- sets anyway, written out here. false leaves claudecode.nvim to you.
     claudecode = {
       diff_opts = {
+        -- One read-only buffer, removed lines red and struck through, added
+        -- lines green, in place of old | proposed. Read-only: you can accept
+        -- or deny, but not edit the proposal first. "vertical" is the default.
+        layout = "unified",
         open_in_new_tab = true, -- each diff in a full-screen tab of its own
         hide_terminal_in_new_tab = true, -- no terminal split in that tab
       },
