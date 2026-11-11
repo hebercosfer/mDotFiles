@@ -82,6 +82,10 @@ return {
       )
 
       require("util.multigrep").setup()
+
+      vim.keymap.set("n", "<leader>fw", function()
+        builtin.diagnostics({ severity_limit = "WARN" })
+      end, { desc = "Telescope: [f]ind LSP diagnostics ([w]arnings and errors)" })
     end,
   },
 }
