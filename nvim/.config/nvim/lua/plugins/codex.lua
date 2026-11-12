@@ -1,158 +1,44 @@
+-- coalio/codex.nvim: the Codex TUI in a centered floating window. setup()
+-- starts the local App Server and installs the keymaps below.
+-- Every option is written out at its default, to change in place.
+-- Keys sit under <leader>c: claude.lua already owns <leader>a* (its own
+-- <leader>ac and <leader>as collide with codex.nvim's defaults).
 return {
-  -- "ishiooon/codex.nvim",
-  -- dependencies = { "folke/snacks.nvim" },
-  -- lazy = false,
-  -- config = function(_, opts)
-  --   require("codex").setup(opts)
-  --
-  --   local function deny_codex_diff()
-  --     local diff = require("codex.diff")
-  --     local current_buf = vim.api.nvim_get_current_buf()
-  --     local tab_name = vim.b[current_buf].codex_diff_tab_name
-  --
-  --     if not tab_name then
-  --       diff.deny_current_diff()
-  --       return
-  --     end
-  --
-  --     diff.deny_current_diff()
-  --     diff.close_diff_by_tab_name(tab_name)
-  --   end
-  --
-  --   pcall(vim.api.nvim_del_user_command, "CodexDiffDeny")
-  --   vim.api.nvim_create_user_command("CodexDiffDeny", deny_codex_diff, {
-  --     desc = "Reject and close the current Codex diff",
-  --   })
-  --
-  --   local function get_visible_terminal_window(bufnr)
-  --     if not bufnr then
-  --       return nil
-  --     end
-  --
-  --     local bufinfo = vim.fn.getbufinfo(bufnr)[1]
-  --     if not bufinfo or not bufinfo.windows then
-  --       return nil
-  --     end
-  --
-  --     for _, win in ipairs(bufinfo.windows) do
-  --       if vim.api.nvim_win_is_valid(win) then
-  --         return win
-  --       end
-  --     end
-  --   end
-  --
-  --   local function toggle_codex_float(command_opts)
-  --     local terminal = require("codex.terminal")
-  --     local bufnr = terminal.get_active_terminal_bufnr()
-  --     local win = get_visible_terminal_window(bufnr)
-  --     local args = command_opts and command_opts.args ~= "" and command_opts.args or nil
-  --
-  --     if win and vim.api.nvim_win_get_config(win).relative ~= "" then
-  --       terminal.simple_toggle({}, args)
-  --     else
-  --       terminal.maximize_toggle({}, args)
-  --     end
-  --   end
-  --
-  --   local function focus_codex_float(command_opts)
-  --     local terminal = require("codex.terminal")
-  --     local bufnr = terminal.get_active_terminal_bufnr()
-  --     local win = get_visible_terminal_window(bufnr)
-  --
-  --     if not win or vim.api.nvim_win_get_config(win).relative == "" then
-  --       terminal.maximize_toggle({}, command_opts and command_opts.args ~= "" and command_opts.args or nil)
-  --       return
-  --     end
-  --
-  --     vim.api.nvim_set_current_win(win)
-  --     vim.cmd("startinsert")
-  --   end
-  --
-  --   vim.api.nvim_create_user_command("CodexFloat", toggle_codex_float, {
-  --     nargs = "*",
-  --     desc = "Toggle Codex in a floating terminal",
-  --   })
-  --   vim.api.nvim_create_user_command("CodexFloatFocus", focus_codex_float, {
-  --     nargs = "*",
-  --     desc = "Focus Codex in a floating terminal",
-  --   })
-  --
-  --   -- Override :Codex to always open as float.
-  --   pcall(vim.api.nvim_del_user_command, "Codex")
-  --   vim.api.nvim_create_user_command("Codex", toggle_codex_float, {
-  --     nargs = "*",
-  --     desc = "Toggle Codex in a floating terminal",
-  --   })
-  --
-  --   vim.api.nvim_create_autocmd("TermOpen", {
-  --     pattern = "*codex*",
-  --     callback = function(ev)
-  --       vim.keymap.set("t", "<C-x><C-m>", "<cmd>Codex<cr>", {
-  --         buffer = ev.buf,
-  --         desc = "Hide Codex to background",
-  --       })
-  --     end,
-  --   })
-  --
-  --   -- Start the fixed-port HTTP MCP proxy so codex can reach codex.nvim's
-  --   -- WebSocket server.  The proxy reads the WS port from the lockfile on
-  --   -- demand, so it survives Neovim restarts without needing to be restarted.
-  --   -- The codex config.toml permanently points at port 44200.
-  --   local function start_mcp_proxy()
-  --     local script = vim.fn.stdpath("config") .. "/scripts/codex-mcp-proxy.js"
-  --     if vim.fn.filereadable(script) == 0 then
-  --       vim.notify("codex.nvim: proxy script not found at " .. script, vim.log.levels.ERROR)
-  --       return
-  --     end
-  --
-  --     local job_id = vim.fn.jobstart({ "node", script, "44200" }, {
-  --       on_stderr = function(_, lines)
-  --         for _, line in ipairs(lines) do
-  --           if line ~= "" then
-  --             vim.schedule(function()
-  --               vim.notify("codex proxy: " .. line, vim.log.levels.DEBUG)
-  --             end)
-  --           end
-  --         end
-  --       end,
-  --       on_exit = function(_, code)
-  --         if code ~= 0 then
-  --           vim.schedule(function()
-  --             vim.notify("codex HTTP proxy exited (code " .. code .. ")", vim.log.levels.WARN)
-  --           end)
-  --         end
-  --       end,
-  --     })
-  --
-  --     if job_id <= 0 then
-  --       vim.notify("codex.nvim: failed to start HTTP proxy", vim.log.levels.ERROR)
-  --       return
-  --     end
-  --
-  --     vim.api.nvim_create_autocmd("VimLeavePre", {
-  --       once = true,
-  --       callback = function() vim.fn.jobstop(job_id) end,
-  --     })
-  --   end
-  --
-  --   start_mcp_proxy()
-  -- end,
+  -- "coalio/codex.nvim",
+  -- -- Loads once the UI is up, as claude.lua does, rather than on a key press.
+  -- event = "VeryLazy",
   -- opts = {
-  --   auto_start = true,
-  --   terminal = {
-  --     unfocus_key = "<C-]>",
-  --     maximized_width_percentage = 0.8,
-  --     maximized_height_percentage = 0.8,
+  --   backend = "app_server", -- app_server | terminal (raw codex, no App Server)
+  --   cmd = "codex", -- or an absolute path / command list
+  --   model = nil, -- e.g. "gpt-5-codex"; nil uses Codex's own default
+  --   autoinstall = true, -- offer to install the Codex CLI when it is missing
+  --
+  --   -- The floating window that hosts Codex. panel = true would split instead.
+  --   panel = false,
+  --   width = 0.8, -- fraction of the editor (0.1 to 1)
+  --   height = 0.8,
+  --   border = "rounded", -- single | double | rounded | none
+  --
+  --   track_selection = true, -- follow the visual selection for :CodexSend
+  --   include_active_buffer_context = true, -- send the active file's position with prompts
+  --
+  --   -- Mappings; false or '' skips one.
+  --   keymaps = {
+  --     toggle = "<leader>cc", -- normal and terminal: show or hide the float
+  --     open = false, -- same as toggle here, so skipped
+  --     send = "<leader>cs", -- normal and visual: send the selection or a reference
+  --     session_new = "<leader>cn", -- normal: open a new numbered session
+  --     yolo = false, -- normal: a session with --dangerously-bypass-approvals-and-sandbox
+  --     quit = "<C-q>", -- inside the Codex buffer: close the pane
+  --     interrupt = "<C-c>", -- App Server buffer UI only; the terminal UI keeps it
   --   },
-  -- },
-  -- keys = {
-  --   { "<leader>c",  nil,                    desc = "Codex" },
-  --   { "<leader>cc", "<cmd>CodexFloat<cr>",  desc = "Toggle Codex (float)" },
-  --   { "<leader>cc", "<cmd>CodexSend<cr>",   mode = "v", desc = "Send to Codex" },
-  --   { "<leader>cs", "<cmd>Codex<cr>",       desc = "Toggle Codex (side)" },
-  --   { "<leader>cf", "<cmd>CodexFloatFocus<cr>", desc = "Focus Codex (float)" },
-  --   { "<leader>cm", "<cmd>CodexMaximizeToggle<cr>", desc = "Toggle Codex float" },
-  --   { "<leader>cy", "<cmd>CodexDiffAccept<cr>", desc = "Accept Codex diff" },
-  --   { "<leader>cn", "<cmd>CodexDiffDeny<cr>",   desc = "Reject Codex diff" },
+  --
+  --   app_server = {
+  --     ui = "terminal", -- terminal | buffer (transcript, for debugging)
+  --     auto_start = true, -- start the App Server when Neovim starts
+  --     open_terminal = true,
+  --     dynamic_tools = true,
+  --     enable_features = { "apps" },
+  --   },
   -- },
 }

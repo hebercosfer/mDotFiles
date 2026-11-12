@@ -18,7 +18,7 @@ local M = {
     event = "VeryLazy",
     -- priority = 1000,
     config = function()
-      vim.cmd.colorscheme("tokyonight")
+      -- vim.cmd.colorscheme("tokyonight")
     end,
   },
   {
@@ -84,7 +84,7 @@ local M = {
       -- catppuccin-frappe
       -- catppuccin-macchiato
       -- catppuccin-mocha
-      -- vim.cmd.colorscheme("catppuccin-mocha")
+      vim.cmd.colorscheme("catppuccin-nvim")
     end,
   },
   {
