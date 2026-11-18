@@ -1,7 +1,7 @@
 return {
   {
     "nvim-telescope/telescope.nvim",
-    tag = "0.1.8",
+    -- tag = "0.1.8",
     dependencies = {
       "nvim-lua/plenary.nvim",
       { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
@@ -16,7 +16,7 @@ return {
           find_files = {
             theme = "ivy",
           },
-          coloscheme = {
+          colorscheme = {
             theme = "ivy",
             enable_preview = true,
           },
