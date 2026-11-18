@@ -47,7 +47,7 @@ local toggle_terminal = function()
     if vim.bo[state.floating.buf].buftype ~= "terminal" then
       vim.cmd.terminal()
       vim.keymap.set("t", "<C-x><C-m>", "<cmd>Floaterminal<cr>", {
-        buffer = state.floating.buf,
+        buf = state.floating.buf,
         desc = "Hide floating terminal to background",
       })
     end
