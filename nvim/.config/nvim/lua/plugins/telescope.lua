@@ -23,6 +23,8 @@ return {
         },
         extensions = {
           fzf = {},
+          -- The locator in the Qt Creator style: a prompt in the bottom-left corner.
+          controlk = { style = "cutie" },
         },
       })
 
