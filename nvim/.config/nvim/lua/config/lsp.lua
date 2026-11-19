@@ -1,7 +1,7 @@
 local lsp_display_names = {
   lua_ls = "Lua",
   clangd = "C/C++",
-  cmake = "CMake",
+  neocmake = "CMake",
   qmlls = "QML",
 }
 
@@ -42,7 +42,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
   end,
 })
 
-vim.lsp.enable({ "lua_ls", "clangd", "cmake", "qmlls", "regal" })
+vim.lsp.enable({ "lua_ls", "clangd", "neocmake", "qmlls", "regal" })
 vim.diagnostic.config({ virtual_text = true })
 vim.keymap.set("i", "<c-space>", function()
   vim.lsp.completion.get()

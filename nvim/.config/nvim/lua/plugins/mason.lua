@@ -19,7 +19,7 @@ return {
     "williamboman/mason-lspconfig.nvim",
     config = function()
       require("mason-lspconfig").setup({
-        ensure_installed = { "lua_ls", "clangd", "cmake", "regal" },
+        ensure_installed = { "lua_ls", "clangd", "neocmake", "regal" },
         automatic_enable = { exclude = { "stylua" } },
       })
     end,
