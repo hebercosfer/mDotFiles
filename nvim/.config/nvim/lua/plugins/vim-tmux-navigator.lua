@@ -1,5 +1,10 @@
 return {
   "christoomey/vim-tmux-navigator",
+  init = function()
+    -- The plugin's own mappings include normal-mode <C-k>, which would replace the locator's
+    -- the moment the plugin loads. The keys below and options.lua map everything it needs.
+    vim.g.tmux_navigator_no_mappings = 1
+  end,
   cmd = {
     "TmuxNavigateLeft",
     "TmuxNavigateDown",
@@ -8,9 +13,9 @@ return {
     "TmuxNavigatePrevious",
   },
   keys = {
-    { "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
-    { "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
-    { "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
-    { "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
+    { "<c-h>", "<cmd>TmuxNavigateLeft<cr>" },
+    { "<c-j>", "<cmd>TmuxNavigateDown<cr>" },
+    { "<c-l>", "<cmd>TmuxNavigateRight<cr>" },
+    { "<c-\\>", "<cmd>TmuxNavigatePrevious<cr>" },
   },
 }
