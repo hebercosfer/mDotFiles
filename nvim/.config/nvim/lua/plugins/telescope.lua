@@ -38,6 +38,12 @@ return {
       vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "Telescope: [f]ind [f]iles" })
       vim.keymap.set(
         "n",
+        "<leader>fk",
+        "<cmd>Telescope controlk<cr>",
+        { desc = "Telescope: [f]ind [k] locator" }
+      )
+      vim.keymap.set(
+        "n",
         "<leader>fr",
         builtin.resume,
         { desc = "Telescope: [f]ind files [r]esume" }
