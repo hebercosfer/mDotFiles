@@ -42,6 +42,10 @@ vim.api.nvim_create_autocmd("LspAttach", {
   end,
 })
 
+-- clangd indexes the whole project in the background at low priority by default, which
+-- crawls on a busy machine; until it finishes, workspace symbols are partial.
+vim.lsp.config("clangd", { cmd = { "clangd", "--background-index-priority=normal" } })
+
 vim.lsp.enable({ "lua_ls", "clangd", "neocmake", "qmlls", "regal" })
 vim.diagnostic.config({ virtual_text = true })
 vim.keymap.set("i", "<c-space>", function()
