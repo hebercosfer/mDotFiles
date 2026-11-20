@@ -17,7 +17,6 @@ return {
     },
     focus_after_send = true,
     -- Close the Codex window with <C-x><C-m> instead of the default <C-q>.
-    -- <leader>cn is used for diff rejection instead of starting a new session.
     keymaps = {
       quit = "<C-x><C-m>",
     },
