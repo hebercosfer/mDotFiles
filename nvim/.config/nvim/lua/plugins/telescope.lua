@@ -24,7 +24,13 @@ return {
         extensions = {
           fzf = {},
           -- The locator in the Qt Creator style: a prompt in the bottom-left corner.
-          controlk = { style = "cutie" },
+          controlk = {
+            style = "cutie",
+            -- Columns of the prompt and the list, or "auto" to match a sidebar on the left.
+            cutie = { width = 60 },
+            -- `g pattern  *.lua`: the same rg search as <leader>mg, inside the locator.
+            sources = { multigrep = require("util.multigrep").source },
+          },
         },
       })
 
